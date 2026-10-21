@@ -1,0 +1,44 @@
+# --- Preparación previa: Comprobación e instalación de Docker Engine en Debian ---
+ps -p 1 -o comm=
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl enable --now docker
+sudo systemctl is-active docker
+unset DOCKER_HOST DOCKER_CONTEXT
+hash -r
+docker context use default
+sudo docker context use default
+sudo docker version
+sudo docker info --format 'Nombre={{.Name}} | SO={{.OperatingSystem}}'
+sudo docker run --rm hello-world
+
+# --- Paso 1: Preparar Debian, carpetas e instalación de Nmap ---
+mkdir -p ~/HackEtiLabs/docker/practica-01-firsthacking
+cd ~/HackEtiLabs/docker/practica-01-firsthacking
+mkdir -p origen imagen archivos evidencias/nmap evidencias/capturas
+touch README.md archivos/comandos.txt
+sudo apt update && sudo apt install -y nmap
+sudo docker version
+nmap --version
+nmap --script-help ftp-vsftpd-backdoor
+
+# --- Paso 2: Obtener y cargar la imagen ---
+sudo apt install -y unzip
+cp /mnt/c/Users/manue/Downloads/firsthacking.zip origen/
+unzip origen/firsthacking.zip -d origen/
+ls -lh origen
+sudo docker load -i origen/firsthacking.tar
+sudo docker images
